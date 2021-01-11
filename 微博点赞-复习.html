@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博点赞</title>
+    <style>
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .msg-list ul {
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .msg-list li {
+            position: relative;
+            margin: 10px 0;
+            padding: 5px;
+            line-height: 2;
+            border-bottom: 1px dotted #ddd;
+        }
+
+        .msg-list li time {
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: #999;
+        }
+
+        .msg-list li.active {
+            float: right;
+            background-color: #fc0;
+            color: #fff;
+        }
+
+        .msg-list textarea {
+            display: block;
+            min-height: 50px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .qty {
+            text-align: right;
+        }
+
+        .qty span:first-child {
+            color: #f00;
+        }
+
+        .content {
+            line-height: 2;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .form {
+            display: none;
+        }
+
+        .head {
+            position: relative;
+        }
+
+        .head time {
+            padding: 0 5px;
+            color: #999;
+        }
+
+        .head span {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 23px 5px 0;
+            width: 20px;
+            background-color: #58bc58;
+            text-align: center;
+            color: #fff;
+            font-size: 10px;
+        }
+
+        .head .zan {
+            right: 35px;
+        }
+
+        .head img {
+            position: absolute;
+            top: 5px;
+            left: 15%;
+            width: 70%;
+        }
+
+        .dspb {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container" class="msg-list">
+        <div class="content"></div>
+        <ul>
+        </ul>
+        <div class="form">
+            <textarea></textarea>
+            <button>提交</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let container = document.querySelector('#container');
+            let content = container.querySelector('.content');
+            let ulbox = container.querySelector('ul');
+            let form = container.querySelector('.form');
+            let msgBox = container.querySelector('textarea');
+            let btn = container.querySelector('button');
+
+            console.log(container, content, ulbox, form, msgBox, btn);
+
+            let weibo = {
+                "name": "laoxie",
+                "content": "说说最让人热血沸腾的一句话，我先来：不逼自己一把，你永远都不知道自己有多优秀",
+                "time": "2020-11-11 12:12:20",
+                "zan": 1,
+                "comment": [{
+                        "name": "小谢",
+                        "con": "你可以上二流的大学，但不能过二流的人生",
+                        "time": "2020-12-5 12:12:20"
+                    },
+                    {
+                        "name": "tiantian",
+                        "con": "你不能拼爹，所以只能拼命",
+                        "time": "2020-12-6 08:20:23"
+                    },
+                    {
+                        "name": "静静",
+                        "con": "你不能想别的，你只能想我",
+                        "time": "2020-12-7 18:34:56"
+                    }
+                ]
+            }
+
+            init();
+            // 封装写入页面的函数
+            function init() {
+                content.innerHTML = `
+                    <div class="head">
+                        <strong>${weibo.name}</strong>
+                        <time>${weibo.time}</time>
+                        <span class="zan"><img src="img/icon/zan.svg"/>${weibo.zan}</span>
+                        <span class="com"><img src="img/icon/com.svg"/>${weibo.comment.length}</span>
+                    </div>
+                    <p>${weibo.content}</p>
+                `
+                render();
+            }
+
+            function render() {
+                ulbox.innerHTML = weibo.comment.map(function (item) {
+                    return `<li><span>${item.name}</span> ： ${item.con} <time>${item.time}</time></li>`
+                }).join('');
+            }
+
+            // 给父节点绑定事件，利用冒泡机制把事件绑定到父级，可以大大减少事件数量
+            container.onclick = function (e) {
+                if (e.target.className === 'zan' || e.target.parentElement.className === 'zan') {
+                    weibo.zan++;
+                    init();
+                } else if (e.target.className === 'com' || e.target.parentElement.className === 'com') {
+                    form.classList.toggle('dspb');
+                } else if (e.target.tagName.toLowerCase() === 'button') {
+                    send();
+                    init();
+                }
+            }
+
+            //  封装时间函数
+            function formatDate() {
+                let now = new Date();
+                let date = now.toLocaleDateString().replace(/\//g, '-');
+                let time = now.toLocaleTimeString().substr(2);
+
+                return date + ' ' + time;
+            }
+
+            // 发送
+            function send() {
+                let _msg = msgBox.value.trim();
+                weibo.comment.push({
+                    name: '我',
+                    con: _msg,
+                    time: formatDate()
+                })
+                msgBox.focus();
+                msgBox.value = '';
+            }
+        })
+    </script>
+</body>
+
+</html>
